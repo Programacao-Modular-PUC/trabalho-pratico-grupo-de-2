@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reserva e Aluguel</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="nav">
+    <a href="index.html">Início</a>
+    <a href="residencias.html">Residências</a>
+    <a href="reserva.html">Reserva/Aluguel</a>
+    <a href="recibo.html">Recibo</a>
+  </div>
+  <div class="container">
+    <div class="card">
+      <h2>Formulário de Reserva/Aluguel</h2>
+      <div class="grid">
+        <div>
+          <label>Cliente</label>
+          <input type="text" value="Ana Beatriz" />
+          <label>CPF</label>
+          <input type="text" value="123.456.789-00" />
+          <label>Residência</label>
+          <input type="text" value="Casa Ponta do Mutá" />
+        </div>
+        <div>
+          <label>Quarto</label>
+          <select><option>Quarto Casal - Hidromassagem</option></select>
+          <label>Entrada</label>
+          <input type="datetime-local" value="2026-05-10T14:00" />
+          <label>Saída</label>
+          <input type="datetime-local" value="2026-05-12T13:00" />
+        </div>
+      </div>
+      <label>Tipo de operação</label>
+      <select>
+        <option>RESERVADO</option>
+        <option selected>ALUGADO</option>
+      </select>
+      <button class="btn">Calcular e confirmar</button>
+    </div>
+  </div>
+</body>
+</html>
