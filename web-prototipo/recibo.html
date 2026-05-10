@@ -16,13 +16,11 @@
   <div class="container">
     <div class="card">
       <h2>Recibo</h2>
-      <div class="receipt">
-Data e horário de entrada: 2026-05-10T14:00
-Data e horário de saída: 2026-05-12T13:00
-Número de diárias: 4
-Total à pagar: R$ 1.200,00
-      </div>
+      <p class="hint">Abre automaticamente após confirmar um aluguel ou use <code>?id=</code> na URL (ex.: <code>recibo.html?id=1</code>).</p>
+      <div id="recibo-conteudo" class="receipt">Carregando…</div>
     </div>
   </div>
+  <script src="api.js"></script>
+  <script src="recibo.js"></script>
 </body>
 </html>

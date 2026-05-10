@@ -14,51 +14,110 @@
     <a href="recibo.html">Recibo</a>
   </div>
   <div class="container">
+    <p id="msg-global" class="banner hidden" role="status"></p>
+
     <div class="card">
-      <h2>Cadastro de Residência</h2>
+      <h2>Cadastro de residência</h2>
+      <p class="hint">A API usa <strong>nome</strong> e <strong>endereco</strong>; os campos abaixo são agrupados no endereço completo.</p>
       <div class="grid">
         <div>
-          <label>Endereço</label>
-          <input type="text" value="Rua das Piscinas Naturais" />
-          <label>Número</label>
-          <input type="text" value="120" />
-          <label>Bairro</label>
-          <input type="text" value="Centro" />
+          <label for="res-nome">Nome da residência</label>
+          <input id="res-nome" type="text" placeholder="Ex.: Casa Ponta do Mutá" />
+          <label for="res-endereco">Endereço (logradouro)</label>
+          <input id="res-endereco" type="text" placeholder="Rua das Piscinas Naturais" />
+          <label for="res-numero">Número</label>
+          <input id="res-numero" type="text" placeholder="120" />
+          <label for="res-bairro">Bairro</label>
+          <input id="res-bairro" type="text" placeholder="Centro" />
         </div>
         <div>
-          <label>CEP</label>
-          <input type="text" value="45520-000" />
-          <label>Telefone</label>
-          <input type="text" value="(73) 99999-9999" />
-          <label>Email</label>
-          <input type="text" value="contato@residenciamarau.com" />
+          <label for="res-cep">CEP</label>
+          <input id="res-cep" type="text" placeholder="45520-000" />
+          <label for="res-tel">Telefone</label>
+          <input id="res-tel" type="text" placeholder="(73) 99999-9999" />
+          <label for="res-email">Email</label>
+          <input id="res-email" type="text" placeholder="contato@residenciamarau.com" />
         </div>
       </div>
-      <button class="btn">Salvar</button>
+      <button type="button" id="btn-salvar-residencia" class="btn">Salvar residência</button>
+      <p id="msg-residencia" class="banner hidden" role="status"></p>
     </div>
 
     <div class="card">
-      <h2>Quartos da Residência</h2>
+      <h2>Residências cadastradas</h2>
+      <button type="button" id="btn-atualizar-listas" class="btn btn-secondary">Atualizar lista</button>
+      <ul id="lista-residencias" class="lista-simples"></ul>
+    </div>
+
+    <div class="card">
+      <h2>Adicionar quarto</h2>
       <div class="grid">
         <div>
-          <label>Tipo</label>
-          <select><option>INDIVIDUAL</option></select>
-          <label>Valor base</label>
-          <input type="text" value="160.00" />
-          <label>Ar condicionado</label>
-          <select><option>Sim</option></select>
+          <label for="quarto-residencia-id">Residência</label>
+          <select id="quarto-residencia-id">
+            <option value="">Carregando…</option>
+          </select>
+          <label for="quarto-tipo">Tipo</label>
+          <select id="quarto-tipo">
+            <option value="INDIVIDUAL">INDIVIDUAL</option>
+            <option value="DUPLO_CASAL">DUPLO_CASAL</option>
+            <option value="FAMILIA">FAMILIA</option>
+          </select>
+          <label for="quarto-valor-base">Valor base (diária)</label>
+          <input id="quarto-valor-base" type="text" value="160.00" />
+          <label for="quarto-ar">Ar condicionado</label>
+          <select id="quarto-ar">
+            <option value="false">Não</option>
+            <option value="true">Sim</option>
+          </select>
+          <label for="quarto-hidro">Hidromassagem</label>
+          <select id="quarto-hidro">
+            <option value="false">Não</option>
+            <option value="true">Sim</option>
+          </select>
         </div>
         <div>
-          <label>Hidromassagem</label>
-          <select><option>Não</option></select>
-          <label>Tipo</label>
-          <select><option>CASAL</option></select>
-          <label>Valor base</label>
-          <input type="text" value="220.00" />
+          <div id="grp-individual">
+            <h3 class="subtitulo-form">Individual</h3>
+            <label for="qi-camas">Qtd. camas solteiro</label>
+            <input id="qi-camas" type="number" min="1" value="1" />
+            <label for="qi-valor-cama">Valor adicional por cama</label>
+            <input id="qi-valor-cama" type="text" value="0" />
+          </div>
+          <div id="grp-duplo" style="display: none">
+            <h3 class="subtitulo-form">Duplo casal</h3>
+            <label for="qd-tipo-cama">Tipo cama casal</label>
+            <select id="qd-tipo-cama">
+              <option value="COMUM">COMUM</option>
+              <option value="QUEEN_KING">QUEEN_KING</option>
+            </select>
+            <label for="qd-ad-comum">Adicional conforto comum</label>
+            <input id="qd-ad-comum" type="text" value="0" />
+            <label for="qd-ad-qk">Adicional Queen/King</label>
+            <input id="qd-ad-qk" type="text" value="0" />
+            <label for="qd-taxa-berco">Taxa diária berço</label>
+            <input id="qd-taxa-berco" type="text" value="25.00" />
+          </div>
+          <div id="grp-familia" style="display: none">
+            <h3 class="subtitulo-form">Família</h3>
+            <label for="qf-cap">Capacidade máxima</label>
+            <input id="qf-cap" type="number" min="1" value="6" />
+            <label for="qf-amb">Qtd. ambientes</label>
+            <input id="qf-amb" type="number" min="0" value="2" />
+            <label for="qf-pct-extra">Percentual extra lotação cheia</label>
+            <input id="qf-pct-extra" type="text" value="0.15" />
+            <label for="qf-inc-extra">Incremento desconto por hóspede extra</label>
+            <input id="qf-inc-extra" type="text" value="10.00" />
+            <label for="qf-desc-max">Desconto máximo grupo (0–1)</label>
+            <input id="qf-desc-max" type="text" value="0.20" />
+          </div>
         </div>
       </div>
-      <button class="btn">Adicionar quarto</button>
+      <button type="button" id="btn-add-quarto" class="btn">Adicionar quarto</button>
+      <p id="msg-quarto" class="banner hidden" role="status"></p>
     </div>
   </div>
+  <script src="api.js"></script>
+  <script src="residencias.js"></script>
 </body>
 </html>

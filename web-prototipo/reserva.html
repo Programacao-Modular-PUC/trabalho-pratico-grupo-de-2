@@ -15,32 +15,53 @@
   </div>
   <div class="container">
     <div class="card">
-      <h2>Formulário de Reserva/Aluguel</h2>
+      <h2>Novo cliente (opcional)</h2>
+      <p class="hint">Cadastre antes se ainda não existir na lista abaixo.</p>
       <div class="grid">
         <div>
-          <label>Cliente</label>
-          <input type="text" value="Ana Beatriz" />
-          <label>CPF</label>
-          <input type="text" value="123.456.789-00" />
-          <label>Residência</label>
-          <input type="text" value="Casa Ponta do Mutá" />
+          <label for="cli-nome">Nome</label>
+          <input id="cli-nome" type="text" placeholder="Ana Beatriz" />
+          <label for="cli-cpf">CPF</label>
+          <input id="cli-cpf" type="text" placeholder="12345678900" />
         </div>
         <div>
-          <label>Quarto</label>
-          <select><option>Quarto Casal - Hidromassagem</option></select>
-          <label>Entrada</label>
-          <input type="datetime-local" value="2026-05-10T14:00" />
-          <label>Saída</label>
-          <input type="datetime-local" value="2026-05-12T13:00" />
+          <label for="cli-email">Email</label>
+          <input id="cli-email" type="text" placeholder="ana@email.com" />
         </div>
       </div>
-      <label>Tipo de operação</label>
-      <select>
-        <option>RESERVADO</option>
-        <option selected>ALUGADO</option>
-      </select>
-      <button class="btn">Calcular e confirmar</button>
+      <button type="button" id="btn-novo-cliente" class="btn btn-secondary">Cadastrar cliente</button>
+    </div>
+
+    <div class="card">
+      <h2>Reserva / aluguel</h2>
+      <p class="hint">A API trabalha com <strong>datas</strong> (sem horário). Escolha cliente, residência e quarto já cadastrados.</p>
+      <div class="grid">
+        <div>
+          <label for="sel-cliente">Cliente</label>
+          <select id="sel-cliente"></select>
+          <label for="sel-residencia">Residência</label>
+          <select id="sel-residencia"></select>
+          <label for="sel-quarto">Quarto</label>
+          <select id="sel-quarto"></select>
+        </div>
+        <div>
+          <label for="data-inicio">Data de entrada</label>
+          <input id="data-inicio" type="date" />
+          <label for="data-fim">Data de saída</label>
+          <input id="data-fim" type="date" />
+          <label for="num-hospedes">Número de hóspedes</label>
+          <input id="num-hospedes" type="number" min="1" value="2" />
+          <label class="chk-line">
+            <input id="chk-berco" type="checkbox" />
+            Solicita berço
+          </label>
+        </div>
+      </div>
+      <button type="button" id="btn-confirmar-aluguel" class="btn">Confirmar aluguel</button>
+      <p id="msg-reserva" class="banner hidden" role="status"></p>
     </div>
   </div>
+  <script src="api.js"></script>
+  <script src="reserva.js"></script>
 </body>
 </html>
