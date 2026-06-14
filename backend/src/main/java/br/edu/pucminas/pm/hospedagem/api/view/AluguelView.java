@@ -17,7 +17,8 @@ public record AluguelView(
         boolean solicitaBerço,
         BigDecimal valorDiariaCalculada,
         BigDecimal valorTotal,
-        long quantidadeDiarias
+        long quantidadeDiarias,
+        boolean cancelado
 ) {
     public static AluguelView from(Aluguel a, long quantidadeDiarias) {
         return new AluguelView(
@@ -32,7 +33,8 @@ public record AluguelView(
                 a.isSolicitaBerço(),
                 a.getValorDiariaCalculada(),
                 a.getValorTotal(),
-                quantidadeDiarias
+                quantidadeDiarias,
+                a.isCancelado()
         );
     }
 }

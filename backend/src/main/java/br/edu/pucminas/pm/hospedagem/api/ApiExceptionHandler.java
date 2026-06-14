@@ -1,5 +1,9 @@
 package br.edu.pucminas.pm.hospedagem.api;
 
+import br.edu.pucminas.pm.hospedagem.exception.CapacidadeExcedidaException;
+import br.edu.pucminas.pm.hospedagem.exception.DataInvalidaException;
+import br.edu.pucminas.pm.hospedagem.exception.QuartoIndisponivelException;
+import br.edu.pucminas.pm.hospedagem.exception.RecursoNaoPermitidoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,8 +16,18 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> ilegal(IllegalArgumentException ex) {
+    @ExceptionHandler(QuartoIndisponivelException.class)
+    public ResponseEntity<Map<String, String>> quartoIndisponivel(QuartoIndisponivelException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", ex.getMessage()));
+    }
+
+    @ExceptionHandler({
+            CapacidadeExcedidaException.class,
+            DataInvalidaException.class,
+            RecursoNaoPermitidoException.class,
+            IllegalArgumentException.class
+    })
+    public ResponseEntity<Map<String, String>> requisicaoInvalida(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("erro", ex.getMessage()));
     }
 

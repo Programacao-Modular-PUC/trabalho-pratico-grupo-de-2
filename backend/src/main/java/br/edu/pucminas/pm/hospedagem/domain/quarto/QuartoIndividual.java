@@ -1,5 +1,7 @@
 package br.edu.pucminas.pm.hospedagem.domain.quarto;
 
+import br.edu.pucminas.pm.hospedagem.exception.CapacidadeExcedidaException;
+import br.edu.pucminas.pm.hospedagem.exception.RecursoNaoPermitidoException;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -39,11 +41,11 @@ public class QuartoIndividual extends Quarto {
     @Override
     public void validarParametrosAluguel(ParametrosDiaria parametros) {
         if (parametros.solicitaBerço()) {
-            throw new IllegalArgumentException("Quarto individual não permite berço.");
+            throw new RecursoNaoPermitidoException("Quarto individual não permite berço.");
         }
         int h = parametros.numeroHospedes();
         if (h < 1 || h > quantidadeCamasSolteiro) {
-            throw new IllegalArgumentException(
+            throw new CapacidadeExcedidaException(
                     "Número de hóspedes deve estar entre 1 e " + quantidadeCamasSolteiro + " (limite das camas).");
         }
     }

@@ -42,6 +42,11 @@ public class AluguelController {
         return aluguelService.criar(req);
     }
 
+    @PostMapping("/{id}/cancelamento")
+    public AluguelView cancelar(@PathVariable Long id) {
+        return aluguelService.cancelar(id);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void excluir(@PathVariable Long id) {

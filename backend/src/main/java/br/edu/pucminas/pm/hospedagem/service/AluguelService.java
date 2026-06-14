@@ -6,6 +6,8 @@ import br.edu.pucminas.pm.hospedagem.domain.Aluguel;
 import br.edu.pucminas.pm.hospedagem.domain.Cliente;
 import br.edu.pucminas.pm.hospedagem.domain.quarto.ParametrosDiaria;
 import br.edu.pucminas.pm.hospedagem.domain.quarto.Quarto;
+import br.edu.pucminas.pm.hospedagem.exception.DataInvalidaException;
+import br.edu.pucminas.pm.hospedagem.exception.QuartoIndisponivelException;
 import br.edu.pucminas.pm.hospedagem.repository.AluguelRepository;
 import br.edu.pucminas.pm.hospedagem.repository.ClienteRepository;
 import br.edu.pucminas.pm.hospedagem.repository.QuartoRepository;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -39,6 +42,16 @@ public class AluguelService {
     }
 
     @Transactional(readOnly = true)
+    public List<AluguelView> historicoPorCliente(Long clienteId) {
+        if (!clienteRepository.existsById(clienteId)) {
+            throw new IllegalArgumentException("Cliente não encontrado: " + clienteId);
+        }
+        return aluguelRepository.findByClienteIdOrderByDataInicioDesc(clienteId).stream()
+                .map(this::paraView)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public AluguelView buscar(Long id) {
         Aluguel a = aluguelRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Aluguel não encontrado: " + id));
@@ -47,19 +60,16 @@ public class AluguelService {
 
     @Transactional
     public AluguelView criar(AluguelRequest req) {
+        validarDatas(req.dataInicio(), req.dataFim());
+
         Cliente cliente = clienteRepository.findById(req.clienteId())
                 .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado: " + req.clienteId()));
         Quarto quarto = quartoRepository.findById(req.quartoId())
                 .orElseThrow(() -> new IllegalArgumentException("Quarto não encontrado: " + req.quartoId()));
 
-        if (!req.dataFim().isAfter(req.dataInicio())) {
-            throw new IllegalArgumentException("dataFim deve ser posterior a dataInicio.");
-        }
+        verificarDisponibilidade(req.quartoId(), req.dataInicio(), req.dataFim());
 
         long diarias = ChronoUnit.DAYS.between(req.dataInicio(), req.dataFim());
-        if (diarias <= 0) {
-            throw new IllegalArgumentException("Estadia deve ter pelo menos 1 diária.");
-        }
 
         ParametrosDiaria parametros = new ParametrosDiaria(req.numeroHospedes(), req.solicitaBerço());
         quarto.validarParametrosAluguel(parametros);
@@ -75,14 +85,48 @@ public class AluguelService {
         a.setSolicitaBerço(req.solicitaBerço());
         a.setValorDiariaCalculada(valorDiaria);
         a.setValorTotal(valorTotal);
+        a.setCancelado(false);
 
         return paraView(aluguelRepository.save(a));
+    }
+
+    @Transactional
+    public AluguelView cancelar(Long id) {
+        Aluguel a = aluguelRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Aluguel não encontrado: " + id));
+        if (a.isCancelado()) {
+            throw new IllegalArgumentException("Aluguel já está cancelado: " + id);
+        }
+        a.setCancelado(true);
+        return paraView(a);
     }
 
     @Transactional
     public void excluir(Long id) {
         aluguelRepository.delete(
                 aluguelRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Aluguel não encontrado: " + id)));
+    }
+
+    static void validarDatas(LocalDate dataInicio, LocalDate dataFim) {
+        if (dataInicio == null || dataFim == null) {
+            throw new DataInvalidaException("Datas de início e fim são obrigatórias.");
+        }
+        if (!dataFim.isAfter(dataInicio)) {
+            throw new DataInvalidaException("dataFim deve ser posterior a dataInicio.");
+        }
+        long diarias = ChronoUnit.DAYS.between(dataInicio, dataFim);
+        if (diarias <= 0) {
+            throw new DataInvalidaException("Estadia deve ter pelo menos 1 diária.");
+        }
+    }
+
+    void verificarDisponibilidade(Long quartoId, LocalDate dataInicio, LocalDate dataFim) {
+        List<Aluguel> conflitos = aluguelRepository.findConflitosAtivos(quartoId, dataInicio, dataFim);
+        if (!conflitos.isEmpty()) {
+            throw new QuartoIndisponivelException(
+                    "Quarto #" + quartoId + " indisponível no período de "
+                            + dataInicio + " a " + dataFim + ".");
+        }
     }
 
     private AluguelView paraView(Aluguel a) {

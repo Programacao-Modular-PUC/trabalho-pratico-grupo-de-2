@@ -15,7 +15,7 @@
     <artifactId>hospedagem-api</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <name>hospedagem-api</name>
-    <description>Sistema de hospedagem - Sprint 2 PM</description>
+    <description>Sistema de hospedagem - Sprint 3 PM</description>
 
     <properties>
         <java.version>17</java.version>
@@ -70,6 +70,32 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <reportFormat>plain</reportFormat>
+                    <consoleOutputReporter>
+                        <disable>false</disable>
+                    </consoleOutputReporter>
+                    <statelessTestsetInfoReporter>
+                        <disable>false</disable>
+                    </statelessTestsetInfoReporter>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.2.5</version>
+                <executions>
+                    <execution>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

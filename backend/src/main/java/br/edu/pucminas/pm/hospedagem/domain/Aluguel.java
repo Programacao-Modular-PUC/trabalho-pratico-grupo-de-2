@@ -47,6 +47,9 @@ public class Aluguel {
     @Column(name = "valor_total", nullable = false, precision = 14, scale = 2)
     private BigDecimal valorTotal;
 
+    @Column(nullable = false)
+    private boolean cancelado = false;
+
     public Long getId() {
         return id;
     }
@@ -113,5 +116,13 @@ public class Aluguel {
 
     public void setValorTotal(BigDecimal valorTotal) {
         this.valorTotal = valorTotal;
+    }
+
+    public boolean isCancelado() {
+        return cancelado;
+    }
+
+    public void setCancelado(boolean cancelado) {
+        this.cancelado = cancelado;
     }
 }

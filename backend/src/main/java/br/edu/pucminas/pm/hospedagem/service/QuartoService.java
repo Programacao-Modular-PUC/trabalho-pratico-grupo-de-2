@@ -28,13 +28,44 @@ public class QuartoService {
     }
 
     @Transactional(readOnly = true)
+    public List<QuartoView> listarTodos(TipoQuarto tipo) {
+        return buscarPorFiltros(null, tipo).stream().map(QuartoView::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuartoView> listarPorResidencia(Long residenciaId, TipoQuarto tipo) {
+        return buscarPorFiltros(residenciaId, tipo).stream().map(QuartoView::from).toList();
+    }
+
+    private List<Quarto> buscarPorFiltros(Long residenciaId, TipoQuarto tipo) {
+        if (residenciaId != null && tipo != null) {
+            return quartoRepository.findByResidenciaIdAndTipo(residenciaId, classeDoTipo(tipo));
+        }
+        if (residenciaId != null) {
+            return quartoRepository.findByResidenciaId(residenciaId);
+        }
+        if (tipo != null) {
+            return quartoRepository.findByTipo(classeDoTipo(tipo));
+        }
+        return quartoRepository.findAll();
+    }
+
+    private static Class<? extends Quarto> classeDoTipo(TipoQuarto tipo) {
+        return switch (tipo) {
+            case INDIVIDUAL -> QuartoIndividual.class;
+            case DUPLO_CASAL -> QuartoDuploCasal.class;
+            case FAMILIA -> QuartoFamilia.class;
+        };
+    }
+
+    @Transactional(readOnly = true)
     public List<QuartoView> listarTodos() {
-        return quartoRepository.findAll().stream().map(QuartoView::from).toList();
+        return listarTodos(null);
     }
 
     @Transactional(readOnly = true)
     public List<QuartoView> listarPorResidencia(Long residenciaId) {
-        return quartoRepository.findByResidenciaId(residenciaId).stream().map(QuartoView::from).toList();
+        return listarPorResidencia(residenciaId, null);
     }
 
     @Transactional(readOnly = true)

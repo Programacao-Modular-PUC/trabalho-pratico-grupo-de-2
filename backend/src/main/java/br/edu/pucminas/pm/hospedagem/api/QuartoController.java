@@ -2,6 +2,7 @@ package br.edu.pucminas.pm.hospedagem.api;
 
 import br.edu.pucminas.pm.hospedagem.api.dto.QuartoCreateRequest;
 import br.edu.pucminas.pm.hospedagem.api.view.QuartoView;
+import br.edu.pucminas.pm.hospedagem.domain.quarto.TipoQuarto;
 import br.edu.pucminas.pm.hospedagem.service.QuartoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -28,11 +29,13 @@ public class QuartoController {
     }
 
     @GetMapping
-    public List<QuartoView> listar(@RequestParam(required = false) Long residenciaId) {
+    public List<QuartoView> listar(
+            @RequestParam(required = false) Long residenciaId,
+            @RequestParam(required = false) TipoQuarto tipo) {
         if (residenciaId != null) {
-            return quartoService.listarPorResidencia(residenciaId);
+            return quartoService.listarPorResidencia(residenciaId, tipo);
         }
-        return quartoService.listarTodos();
+        return quartoService.listarTodos(tipo);
     }
 
     @GetMapping("/{id}")

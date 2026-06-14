@@ -1,7 +1,9 @@
 package br.edu.pucminas.pm.hospedagem.api;
 
 import br.edu.pucminas.pm.hospedagem.api.dto.ClienteRequest;
+import br.edu.pucminas.pm.hospedagem.api.view.AluguelView;
 import br.edu.pucminas.pm.hospedagem.domain.Cliente;
+import br.edu.pucminas.pm.hospedagem.service.AluguelService;
 import br.edu.pucminas.pm.hospedagem.service.ClienteService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -22,9 +24,11 @@ import java.util.List;
 public class ClienteController {
 
     private final ClienteService clienteService;
+    private final AluguelService aluguelService;
 
-    public ClienteController(ClienteService clienteService) {
+    public ClienteController(ClienteService clienteService, AluguelService aluguelService) {
         this.clienteService = clienteService;
+        this.aluguelService = aluguelService;
     }
 
     @GetMapping
@@ -35,6 +39,11 @@ public class ClienteController {
     @GetMapping("/{id}")
     public Cliente buscar(@PathVariable Long id) {
         return clienteService.buscar(id);
+    }
+
+    @GetMapping("/{id}/alugueis")
+    public List<AluguelView> historicoAlugueis(@PathVariable Long id) {
+        return aluguelService.historicoPorCliente(id);
     }
 
     @PostMapping

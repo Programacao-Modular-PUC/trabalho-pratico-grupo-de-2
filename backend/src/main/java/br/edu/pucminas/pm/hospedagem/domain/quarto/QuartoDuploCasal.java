@@ -1,5 +1,6 @@
 package br.edu.pucminas.pm.hospedagem.domain.quarto;
 
+import br.edu.pucminas.pm.hospedagem.exception.CapacidadeExcedidaException;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -51,7 +52,7 @@ public class QuartoDuploCasal extends Quarto {
     public void validarParametrosAluguel(ParametrosDiaria parametros) {
         int h = parametros.numeroHospedes();
         if (h < 1 || h > 2) {
-            throw new IllegalArgumentException("Quarto duplo casal comporta até 2 hóspedes adultos.");
+            throw new CapacidadeExcedidaException("Quarto duplo casal comporta até 2 hóspedes adultos.");
         }
     }
 
