@@ -11,6 +11,10 @@ import br.edu.pucminas.pm.hospedagem.exception.QuartoIndisponivelException;
 import br.edu.pucminas.pm.hospedagem.repository.AluguelRepository;
 import br.edu.pucminas.pm.hospedagem.repository.ClienteRepository;
 import br.edu.pucminas.pm.hospedagem.repository.QuartoRepository;
+import br.edu.pucminas.pm.hospedagem.service.notificacao.EventoAluguel;
+import br.edu.pucminas.pm.hospedagem.service.notificacao.GerenciadorNotificacoes;
+import br.edu.pucminas.pm.hospedagem.service.notificacao.TipoEventoAluguel;
+import br.edu.pucminas.pm.hospedagem.service.tarifa.TarifaStrategyResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,14 +30,19 @@ public class AluguelService {
     private final AluguelRepository aluguelRepository;
     private final ClienteRepository clienteRepository;
     private final QuartoRepository quartoRepository;
+    private final TarifaStrategyResolver tarifaStrategyResolver;
+    private final GerenciadorNotificacoes gerenciadorNotificacoes;
 
     public AluguelService(
             AluguelRepository aluguelRepository,
             ClienteRepository clienteRepository,
-            QuartoRepository quartoRepository) {
+            QuartoRepository quartoRepository,
+            TarifaStrategyResolver tarifaStrategyResolver) {
         this.aluguelRepository = aluguelRepository;
         this.clienteRepository = clienteRepository;
         this.quartoRepository = quartoRepository;
+        this.tarifaStrategyResolver = tarifaStrategyResolver;
+        this.gerenciadorNotificacoes = GerenciadorNotificacoes.getInstancia();
     }
 
     @Transactional(readOnly = true)
@@ -71,9 +80,14 @@ public class AluguelService {
 
         long diarias = ChronoUnit.DAYS.between(req.dataInicio(), req.dataFim());
 
-        ParametrosDiaria parametros = new ParametrosDiaria(req.numeroHospedes(), req.solicitaBerço());
+        ParametrosDiaria parametros = new ParametrosDiaria(
+                req.numeroHospedes(),
+                req.solicitaBerço(),
+                req.dataInicio(),
+                req.dataFim());
         quarto.validarParametrosAluguel(parametros);
-        BigDecimal valorDiaria = quarto.calcularValorDiaria(parametros);
+        BigDecimal valorDiariaBase = quarto.calcularValorDiaria(parametros);
+        BigDecimal valorDiaria = tarifaStrategyResolver.calcular(valorDiariaBase, parametros);
         BigDecimal valorTotal = valorDiaria.multiply(BigDecimal.valueOf(diarias)).setScale(2, RoundingMode.HALF_UP);
 
         Aluguel a = new Aluguel();
@@ -87,7 +101,9 @@ public class AluguelService {
         a.setValorTotal(valorTotal);
         a.setCancelado(false);
 
-        return paraView(aluguelRepository.save(a));
+        Aluguel salvo = aluguelRepository.save(a);
+        gerenciadorNotificacoes.notificar(new EventoAluguel(TipoEventoAluguel.CRIADO, salvo));
+        return paraView(salvo);
     }
 
     @Transactional
@@ -98,6 +114,7 @@ public class AluguelService {
             throw new IllegalArgumentException("Aluguel já está cancelado: " + id);
         }
         a.setCancelado(true);
+        gerenciadorNotificacoes.notificar(new EventoAluguel(TipoEventoAluguel.CANCELADO, a));
         return paraView(a);
     }
 

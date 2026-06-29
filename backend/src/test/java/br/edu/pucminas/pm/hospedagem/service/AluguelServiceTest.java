@@ -10,16 +10,21 @@ import br.edu.pucminas.pm.hospedagem.exception.RecursoNaoPermitidoException;
 import br.edu.pucminas.pm.hospedagem.repository.AluguelRepository;
 import br.edu.pucminas.pm.hospedagem.repository.ClienteRepository;
 import br.edu.pucminas.pm.hospedagem.repository.QuartoRepository;
+import br.edu.pucminas.pm.hospedagem.service.notificacao.EventoAluguel;
+import br.edu.pucminas.pm.hospedagem.service.notificacao.GerenciadorNotificacoes;
+import br.edu.pucminas.pm.hospedagem.service.notificacao.TipoEventoAluguel;
+import br.edu.pucminas.pm.hospedagem.domain.tarifa.TarifaRegularStrategy;
+import br.edu.pucminas.pm.hospedagem.service.tarifa.TarifaStrategyResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +49,6 @@ class AluguelServiceTest {
     @Mock
     private QuartoRepository quartoRepository;
 
-    @InjectMocks
     private AluguelService aluguelService;
 
     private Cliente cliente;
@@ -59,6 +63,12 @@ class AluguelServiceTest {
         quarto.setValorBase(new BigDecimal("100.00"));
         quarto.setQuantidadeCamasSolteiro(2);
         quarto.setValorAdicionalPorCama(new BigDecimal("10.00"));
+        GerenciadorNotificacoes.getInstancia().limparObservadores();
+        aluguelService = new AluguelService(
+                aluguelRepository,
+                clienteRepository,
+                quartoRepository,
+                new TarifaStrategyResolver(List.of(new TarifaRegularStrategy())));
     }
 
     @Test
@@ -150,6 +160,29 @@ class AluguelServiceTest {
     }
 
     @Test
+    @DisplayName("Criação de aluguel notifica observers")
+    void criarNotificaObservers() {
+        List<EventoAluguel> eventos = new ArrayList<>();
+        GerenciadorNotificacoes.getInstancia().registrar(eventos::add);
+
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
+        when(quartoRepository.findById(1L)).thenReturn(Optional.of(quarto));
+        when(aluguelRepository.findConflitosAtivos(any(), any(), any())).thenReturn(List.of());
+        when(aluguelRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        AluguelRequest req = new AluguelRequest(
+                1L, 1L,
+                LocalDate.of(2026, 6, 10),
+                LocalDate.of(2026, 6, 13),
+                1, false);
+
+        aluguelService.criar(req);
+
+        assertEquals(1, eventos.size());
+        assertEquals(TipoEventoAluguel.CRIADO, eventos.get(0).tipo());
+    }
+
+    @Test
     @DisplayName("Cancelamento de aluguel")
     void cancelarAluguel() {
         Aluguel aluguel = new Aluguel();
@@ -164,10 +197,14 @@ class AluguelServiceTest {
 
         when(aluguelRepository.findById(5L)).thenReturn(Optional.of(aluguel));
 
+        List<EventoAluguel> eventos = new ArrayList<>();
+        GerenciadorNotificacoes.getInstancia().registrar(eventos::add);
+
         var view = aluguelService.cancelar(5L);
 
         assertTrue(view.cancelado());
         assertTrue(aluguel.isCancelado());
+        assertEquals(TipoEventoAluguel.CANCELADO, eventos.get(0).tipo());
     }
 
     @Test
